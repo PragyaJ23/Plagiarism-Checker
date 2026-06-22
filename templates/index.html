@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plagiarism Checker</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Segoe UI, sans-serif;
+        }
+
+        body{
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            background: linear-gradient(
+                135deg,
+                #000000,
+                #0f172a,
+                #1e3a8a
+            );
+        }
+
+        .container{
+
+            width:500px;
+            padding:40px;
+
+            background: rgba(255,255,255,0.08);
+
+            backdrop-filter: blur(12px);
+
+            border-radius:20px;
+
+            border:2px solid transparent;
+
+            background-image:
+            linear-gradient(rgba(255,255,255,0.08),
+            rgba(255,255,255,0.08)),
+            linear-gradient(135deg,#60a5fa,#2563eb);
+
+            background-origin:border-box;
+            background-clip:padding-box,border-box;
+
+            box-shadow:
+            0 0 25px rgba(37,99,235,0.5);
+
+            text-align:center;
+        }
+
+        h1{
+            color:white;
+            margin-bottom:15px;
+            font-size:2rem;
+            letter-spacing:2px;
+        }
+
+        p{
+            color:#d1d5db;
+            margin-bottom:25px;
+            font-size:15px;
+        }
+
+        input[type="file"]{
+            width:100%;
+            padding:10px;
+            color:white;
+            margin-bottom:20px;
+        }
+
+        button{
+
+            background: linear-gradient(
+                135deg,
+                #22c55e,
+                #16a34a
+            );
+
+            color:white;
+            border:none;
+
+            padding:12px 30px;
+
+            border-radius:10px;
+
+            font-size:16px;
+            font-weight:bold;
+
+            cursor:pointer;
+
+            transition:0.3s;
+        }
+
+        button:hover{
+
+            transform:translateY(-3px);
+
+            box-shadow:
+            0 0 20px rgba(34,197,94,0.6);
+        }
+
+        .logo{
+            font-size:50px;
+            margin-bottom:10px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">🛡️</div>
+
+    <h1>PLAGIARISM CHECKER</h1>
+
+    <p>
+        Upload a document and check for plagiarism across online sources.
+    </p>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+
+        <input type="file" name="document" required>
+
+        <br>
+
+        <button type="submit">
+            Upload File
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

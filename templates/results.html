@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Plagiarism Report</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Inter',sans-serif;
+            background:#f5f7fb;
+            color:#1e293b;
+            padding:40px;
+        }
+
+        .container{
+            max-width:1000px;
+            margin:auto;
+            background:white;
+            padding:40px;
+            border-radius:20px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        h1{
+            text-align:center;
+            font-size:42px;
+            margin-bottom:10px;
+            color:#0f172a;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#64748b;
+            margin-bottom:40px;
+        }
+
+        .file-name{
+            font-size:18px;
+            margin-bottom:25px;
+        }
+
+        .score-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            padding:30px;
+            margin-bottom:35px;
+            text-align:center;
+        }
+
+        .score-number{
+            font-size:55px;
+            font-weight:700;
+            color:#2563eb;
+            margin:15px 0;
+        }
+
+        .progress-container{
+            width:100%;
+            height:18px;
+            background:#e2e8f0;
+            border-radius:20px;
+            overflow:hidden;
+            margin-top:20px;
+        }
+
+        .progress-bar{
+            height:100%;
+            background:#2563eb;
+        }
+
+        .download-section{
+            text-align:center;
+            margin-top:20px;
+        }
+
+        .download-btn{
+            background:#2563eb;
+            color:white;
+            border:none;
+            padding:12px 24px;
+            border-radius:10px;
+            font-size:15px;
+            font-weight:600;
+            cursor:pointer;
+        }
+
+        .download-btn:hover{
+            background:#1d4ed8;
+        }
+
+        h2{
+            margin:35px 0 20px;
+            color:#0f172a;
+        }
+
+        .source-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:12px;
+            padding:15px;
+            margin-bottom:12px;
+        }
+
+        .match-card{
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:15px;
+            padding:20px;
+            margin-bottom:20px;
+        }
+
+        .sentence{
+            font-weight:600;
+            margin-bottom:15px;
+            line-height:1.6;
+        }
+
+        .match-score{
+            margin-bottom:10px;
+        }
+
+        .badge{
+            display:inline-block;
+            padding:6px 12px;
+            border-radius:20px;
+            font-size:14px;
+            font-weight:600;
+            margin-top:10px;
+            margin-bottom:10px;
+        }
+
+        .high{
+            background:#fee2e2;
+            color:#b91c1c;
+        }
+
+        .medium{
+            background:#fef3c7;
+            color:#92400e;
+        }
+
+        .low{
+            background:#dcfce7;
+            color:#166534;
+        }
+
+        a{
+            color:#2563eb;
+            text-decoration:none;
+            word-break:break-word;
+        }
+
+        a:hover{
+            text-decoration:underline;
+        }
+
+        .empty{
+            text-align:center;
+            color:#64748b;
+            padding:30px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📄 Plagiarism Report</h1>
+
+    <p class="subtitle">
+        Analyze document similarity and identify possible online sources.
+    </p>
+
+    <div class="file-name">
+        <strong>File:</strong> {{ filename }}
+    </div>
+
+    <div class="score-card">
+
+        <h2>Overall Similarity Score</h2>
+
+        <div class="score-number">
+            {{ score }}%
+        </div>
+
+        <div class="progress-container">
+
+            <div class="progress-bar"
+                 style="width: {{ score }}%;">
+            </div>
+
+        </div>
+
+        <div class="download-section">
+
+            <a href="/static/report.pdf" download>
+                <button class="download-btn">
+                    📥 Download PDF Report
+                </button>
+            </a>
+
+        </div>
+
+    </div>
+
+    <h2>🌐 Possible Sources</h2>
+
+    {% for url in urls %}
+
+    <div class="source-card">
+
+        <a href="{{ url }}" target="_blank">
+            {{ url }}
+        </a>
+
+    </div>
+
+    {% endfor %}
+
+    <h2>🔍 Matched Results</h2>
+
+    {% if matches %}
+
+        {% for match in matches %}
+
+        <div class="match-card">
+
+            <div class="sentence">
+                "{{ match['sentence'] }}"
+            </div>
+
+            <div class="match-score">
+                Similarity Score:
+                <strong>{{ match['score'] }}%</strong>
+            </div>
+
+            {% if match["score"] > 70 %}
+
+                <span class="badge high">
+                    High Match
+                </span>
+
+            {% elif match["score"] > 50 %}
+
+                <span class="badge medium">
+                    Medium Match
+                </span>
+
+            {% else %}
+
+                <span class="badge low">
+                    Low Match
+                </span>
+
+            {% endif %}
+
+            <br><br>
+
+            <strong>Source:</strong>
+
+            <br>
+
+            <a href="{{ match['url'] }}" target="_blank">
+                {{ match['url'] }}
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+            No matching content found.
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>
