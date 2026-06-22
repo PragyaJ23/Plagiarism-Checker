@@ -1,4 +1,8 @@
+
 from serpapi import GoogleSearch
+import os
+from dotenv import load_dotenv
+load_dotenv()
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
@@ -51,6 +55,10 @@ def home():
 def upload():
 
     file = request.files["document"]
+    ALLOWED = {'txt', 'pdf', 'docx', 'csv'}
+    ext = file.filename.split('.')[-1].lower()
+    if ext not in ALLOWED:
+        return "Invalid file type. Please upload txt, pdf, docx or csv.", 400
 
     filepath = "uploads/" + file.filename
 
@@ -114,18 +122,11 @@ def upload():
         key=lambda x: x["score"],
         reverse=True
     )
-
-    # Overall score
-    if all_matches:
-        total = 0
-        for match in all_matches:
-            total += match["score"]
-
-        score = round(
-            total / len(all_matches),
-            2
-        )
-
+    total_sentences = len(sentences[:3])
+    if all_matches and total_sentences > 0:
+        avg_match_score = sum(m["score"] for m in all_matches) / len(all_matches)
+        coverage = len(all_matches) / total_sentences
+        score = round(avg_match_score * coverage, 2)
     else:
         score = 0
 
@@ -164,7 +165,7 @@ def search_web(sentence):
     params = {
         "engine": "google",
         "q": sentence,
-        "api_key": "822ca8568afc48bfd8f53f88727e9b6c5a9f22752542fe004ffe2e7d6aa0587b"
+        "api_key": os.getenv("SERPAPI_KEY")
     }
 
     search = GoogleSearch(params)
@@ -181,38 +182,6 @@ def search_web(sentence):
                 urls.append(result["link"])
 
     return urls
-def find_matching_sentences(sentences, website_text):
-
-    matches = []
-
-    website_sentences = get_sentences(website_text)
-
-    for sentence in sentences:
-
-        best_score = 0
-        best_url=""
-        
-        for website_sentence in website_sentences:
-
-            score = calculate_similarity(
-                sentence,
-                website_sentence
-            )
-
-            if score > best_score:
-
-                best_score = score
-
-        if best_score > 50:
-
-            matches.append({
-                "sentence": sentence,
-                "score": best_score
-            })
-            
-
-
-    return matches
 def calculate_similarity(text1, text2):
 
     documents = [
@@ -253,7 +222,6 @@ def get_website_text(url):
         print("Error:", e)
 
         return ""
-print(search_web("Python programming language"))
 def generate_pdf(filename, score, matches):
 
     pdf_file = "static/report.pdf"
