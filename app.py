@@ -59,7 +59,7 @@ def upload():
     ext = file.filename.split('.')[-1].lower()
     if ext not in ALLOWED:
         return "Invalid file type. Please upload txt, pdf, docx or csv.", 400
-
+    os.makedirs("uploads", exist_ok=True)
     filepath = "uploads/" + file.filename
 
     file.save(filepath)
@@ -80,13 +80,16 @@ def upload():
         sentence_urls = search_web(sentence)
 
         
-        if not urls:
-            urls = sentence_urls
+       for u in sentence_urls:
+    if u not in urls:
+        urls.append(u)
 
         
         for url in sentence_urls:
 
             website_text = get_website_text(url)
+            if not website_text:
+                continue
 
             print("URL:", url)
             print("Website Length:", len(website_text))
@@ -122,16 +125,30 @@ def upload():
         key=lambda x: x["score"],
         reverse=True
     )
-    total_sentences = len(sentences[:3])
-    if all_matches and total_sentences > 0:
-        avg_match_score = sum(m["score"] for m in all_matches) / len(all_matches)
-        coverage = len(all_matches) / total_sentences
-        score = min(
-    round(avg_match_score * coverage, 2),
-    100
-)
-    else:
-        score = 0
+    if len(sentences) > 0:
+
+    sentence_best_scores = {}
+
+    for match in all_matches:
+
+        sentence = match["sentence"]
+
+        if sentence not in sentence_best_scores:
+            sentence_best_scores[sentence] = match["score"]
+
+        else:
+            sentence_best_scores[sentence] = max(
+                sentence_best_scores[sentence],
+                match["score"]
+            )
+
+    score = round(
+        sum(sentence_best_scores.values()) / len(sentences),
+        2
+    )
+
+else:
+    score = 0
 
     print("Total Matches:", len(all_matches))
     print("Highest Score:", score)
@@ -149,9 +166,11 @@ def upload():
         pdf_file=pdf_file
     )
     
+import re
+
 def get_sentences(text):
 
-    sentences = text.split(".")
+    sentences = re.split(r"[.!?]+", text)
 
     cleaned = []
 
@@ -203,29 +222,7 @@ def calculate_similarity(text1, text2):
     )[0][0]
 
     return round(similarity * 100, 2)
-def get_website_text(url):
 
-    try:
-
-        response = requests.get(url, timeout=5)
-
-        soup = BeautifulSoup(
-            response.text,
-            "html.parser"
-        )
-
-        text = soup.get_text()
-
-        print("URL:", url)
-        print("Website text length:", len(text))
-
-        return text
-
-    except Exception as e:
-
-        print("Error:", e)
-
-        return ""
 def get_website_text(url):
 
     try:
@@ -239,6 +236,7 @@ def get_website_text(url):
             headers=headers,
             timeout=10
         )
+        response.raise_for_status()
 
         print("STATUS:", response.status_code)
 
