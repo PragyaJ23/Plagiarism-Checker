@@ -162,24 +162,28 @@ def get_sentences(text):
     return cleaned
 def search_web(sentence):
 
+    api_key = os.getenv("SERPAPI_KEY")
+    print("SERPAPI_KEY:", api_key)
+
     params = {
         "engine": "google",
         "q": sentence,
-        "api_key": os.getenv("SERPAPI_KEY")
+        "api_key": api_key
     }
 
     search = GoogleSearch(params)
-
     results = search.get_dict()
+
+    print("SERPAPI RESULTS:", results)
 
     urls = []
 
     if "organic_results" in results:
-
         for result in results["organic_results"][:5]:
-
             if "link" in result:
                 urls.append(result["link"])
+
+    print("FOUND URLS:", urls)
 
     return urls
 def calculate_similarity(text1, text2):
@@ -220,6 +224,38 @@ def get_website_text(url):
     except Exception as e:
 
         print("Error:", e)
+
+        return ""
+def get_website_text(url):
+
+    try:
+
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        response = requests.get(
+            url,
+            headers=headers,
+            timeout=10
+        )
+
+        print("STATUS:", response.status_code)
+
+        soup = BeautifulSoup(
+            response.text,
+            "html.parser"
+        )
+
+        text = soup.get_text()
+
+        print("TEXT LENGTH:", len(text))
+
+        return text
+
+    except Exception as e:
+
+        print("SCRAPE ERROR:", e)
 
         return ""
 def generate_pdf(filename, score, matches):
