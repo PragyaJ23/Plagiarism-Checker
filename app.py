@@ -64,26 +64,26 @@ def upload():
 
     file.save(filepath)
 
-    # Extract text from uploaded file
+    
     content = extract_text(filepath)
 
-    # Break file into sentences
+   
     sentences = get_sentences(content)
 
     all_matches = []
 
     urls = []
 
-    # Check first 3 sentences
-    for sentence in sentences[:3]:
+    
+    for sentence in sentences:
 
         sentence_urls = search_web(sentence)
 
-        # Save first set of URLs for display
+        
         if not urls:
             urls = sentence_urls
 
-        # Visit each URL
+        
         for url in sentence_urls:
 
             website_text = get_website_text(url)
@@ -126,7 +126,10 @@ def upload():
     if all_matches and total_sentences > 0:
         avg_match_score = sum(m["score"] for m in all_matches) / len(all_matches)
         coverage = len(all_matches) / total_sentences
-        score = round(avg_match_score * coverage, 2)
+        score = min(
+    round(avg_match_score * coverage, 2),
+    100
+)
     else:
         score = 0
 
@@ -163,7 +166,7 @@ def get_sentences(text):
 def search_web(sentence):
 
     api_key = os.getenv("SERPAPI_KEY")
-    print("SERPAPI_KEY:", api_key)
+
 
     params = {
         "engine": "google",
@@ -173,9 +176,6 @@ def search_web(sentence):
 
     search = GoogleSearch(params)
     results = search.get_dict()
-
-    print("SERPAPI RESULTS:", results)
-
     urls = []
 
     if "organic_results" in results:
