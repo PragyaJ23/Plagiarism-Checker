@@ -81,7 +81,7 @@ def upload():
 
         
        for u in sentence_urls:
-    if u not in urls:
+     if u not in urls:
         urls.append(u)
 
         
