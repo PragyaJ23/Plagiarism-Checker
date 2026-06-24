@@ -52,7 +52,6 @@ def extract_text(filepath):
 def home():
     return render_template("index.html")
 @app.route('/upload', methods=['GET', 'POST'])
-@app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'GET':
         return redirect('/')
@@ -74,11 +73,13 @@ def upload():
 
     content = extract_text(filepath)
     sentences = get_sentences(content)
+    sentences = sentences[:5]
     all_matches = []
     urls = []
 
     for sentence in sentences:
         sentence_urls = search_web(sentence)
+        sentence_urls = sentence_urls[:2]
         for u in sentence_urls:
             if u not in urls:
                 urls.append(u)
@@ -87,8 +88,10 @@ def upload():
             website_text = get_website_text(url)
             if not website_text:
                 continue
+            website_text = website_text[:5000]
 
             website_sentences = get_sentences(website_text)
+            website_sentences = website_sentences[:20]
             best_score = 0
 
             for website_sentence in website_sentences:
