@@ -12,7 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 from difflib import SequenceMatcher
 from PyPDF2 import PdfReader
-from flask import Flask,render_template,request
+from flask import Flask, request, render_template, redirect, url_for
 app=Flask(__name__)
 def extract_text(filepath):
 
