@@ -51,9 +51,11 @@ def extract_text(filepath):
 @app.route("/")
 def home():
     return render_template("index.html")
-@app.route("/upload", methods=["POST"])
-@app.route("/upload", methods=["POST"])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    if request.method == 'POST':
+        pass
+    return redirect('/')
 
     file = request.files["document"]
 
