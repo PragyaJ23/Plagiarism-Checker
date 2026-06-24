@@ -52,119 +52,73 @@ def extract_text(filepath):
 def home():
     return render_template("index.html")
 @app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    if request.method == 'POST':
-        pass
-    return redirect('/')
+    if request.method == 'GET':
+        return redirect('/')
+    
+    file = request.files.get("document")
 
-    file = request.files["document"]
+    if not file or file.filename == '':
+        return "No file selected.", 400
 
     ALLOWED = {'txt', 'pdf', 'docx', 'csv'}
-
     ext = file.filename.split('.')[-1].lower()
 
     if ext not in ALLOWED:
         return "Invalid file type. Please upload txt, pdf, docx or csv.", 400
 
     os.makedirs("uploads", exist_ok=True)
-
     filepath = "uploads/" + file.filename
-
     file.save(filepath)
 
     content = extract_text(filepath)
-
     sentences = get_sentences(content)
-
     all_matches = []
-
     urls = []
 
     for sentence in sentences:
-
         sentence_urls = search_web(sentence)
-
-        # Store unique URLs
         for u in sentence_urls:
             if u not in urls:
                 urls.append(u)
 
         for url in sentence_urls:
-
             website_text = get_website_text(url)
-
             if not website_text:
                 continue
 
-            print("URL:", url)
-            print("Website Length:", len(website_text))
-            print("-" * 50)
-
             website_sentences = get_sentences(website_text)
-
             best_score = 0
 
             for website_sentence in website_sentences:
-
-                current_score = calculate_similarity(
-                    sentence,
-                    website_sentence
-                )
-
+                current_score = calculate_similarity(sentence, website_sentence)
                 if current_score > best_score:
                     best_score = current_score
 
             if best_score > 30:
-
                 all_matches.append({
                     "sentence": sentence,
                     "url": url,
                     "score": best_score
                 })
 
-    # Sort matches by score
-    all_matches.sort(
-        key=lambda x: x["score"],
-        reverse=True
-    )
+    all_matches.sort(key=lambda x: x["score"], reverse=True)
 
-    # Calculate overall plagiarism score
     if len(sentences) > 0:
-
         sentence_best_scores = {}
-
         for match in all_matches:
-
-            sentence = match["sentence"]
-
-            if sentence not in sentence_best_scores:
-
-                sentence_best_scores[sentence] = match["score"]
-
+            s = match["sentence"]
+            if s not in sentence_best_scores:
+                sentence_best_scores[s] = match["score"]
             else:
+                sentence_best_scores[s] = max(sentence_best_scores[s], match["score"])
 
-                sentence_best_scores[sentence] = max(
-                    sentence_best_scores[sentence],
-                    match["score"]
-                )
-
-        score = round(
-            sum(sentence_best_scores.values()) / len(sentences),
-            2
-        )
-
+        score = round(sum(sentence_best_scores.values()) / len(sentences), 2)
     else:
-
         score = 0
 
-    print("Total Matches:", len(all_matches))
-    print("Highest Score:", score)
-
-    pdf_file = generate_pdf(
-        file.filename,
-        score,
-        all_matches
-    )
+    pdf_file = generate_pdf(file.filename, score, all_matches)
 
     return render_template(
         "results.html",
